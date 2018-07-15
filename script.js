@@ -68,6 +68,11 @@ function addStudent(){
 function clearAddStudentFormInputs(){
 }
 /***************************************************************************************************
+ * 
+ * 
+ * 
+ * 
+ * 
  * renderStudentOnDom - take in a student object, create html elements from the values and then append the elements
  * into the .student_list tbody
  * @param {object} studentObj a single student object with course, name, and grade inside
@@ -91,6 +96,22 @@ function updateStudentList(){
  */
 function calculateGradeAverage(){
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /***************************************************************************************************
  * renderGradeAverage - updates the on-page grade average
  * @param: {number} average    the grade average
