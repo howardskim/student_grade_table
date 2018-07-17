@@ -66,7 +66,7 @@ function renderStudentOnDom(array) {
         var tableButton = $('<td>')
         var deleteButton = $('<button>', {
             class: 'btn btn-danger dButton',
-            id: `delete-${i}`,
+            id: i,
             text: 'Delete'
         });
         deleteButton.on('click', handleDeleteButton)
@@ -81,5 +81,7 @@ function renderStudentOnDom(array) {
 }
 function handleDeleteButton(){
     this.closest('tr').remove();
+    var deleteIndex = $(this).attr('id');
+    student_array.splice(deleteIndex, 1)
 
 }
