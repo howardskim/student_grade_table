@@ -27,7 +27,9 @@ function handleAddClicked() {
 }
 
 function addStudent() {
-    var eachStudentObject = {};
+    var eachStudentObject = {
+        
+    };
     var eachStudentName = $('#studentName').val();
     var eachStudentCourse = $('#course').val();
     var eachStudentGrade = $('#studentGrade').val();
@@ -96,7 +98,10 @@ function renderStudentOnDom(eachStudentObject) {
         $('.confirmh5').text(`Are you sure you want to delete ${eachStudentObject.name}?`);
         $('.confirmDeleteButton').on('click', function () {
             $(closestRow).remove();
+            //this is the main function to delete the student object that was clicked
             handleDeleteButton(eachStudentObject);
+
+            //this is the function that deletes the data from the server
             deleteStudentFromDatabase(eachStudentObject);
             $('#confirmDeleteModal').modal('hide')
         })
@@ -123,15 +128,9 @@ function handleEditButton() {
 }
 
 function handleDeleteButton(currentStudent) {
-    // debugger;
     student_array.splice(currentStudent, 1);
     var avgGrade = calculateGradeAverage(student_array);
     $('.avgGrade').text(avgGrade);
-    $('#confirmDeleteModal').modal({
-        show: false
-    });
-
-
 }
 
 function getDataFromServer() {
