@@ -28,21 +28,21 @@ function handleAddClicked() {
 
 function addStudent() {
     var eachStudentObject = {
-        
+
     };
     var eachStudentName = $('#studentName').val();
     var eachStudentCourse = $('#course').val();
     var eachStudentGrade = $('#studentGrade').val();
-    var eachStudentId = student_array[student_array.length - 1].id + 1;
-    eachStudentObject.id = eachStudentId;
+    // var eachStudentId = student_array[student_array.length - 1].id //+ 1;
+    // eachStudentObject.id = eachStudentId;
     eachStudentObject.name = eachStudentName;
-    eachStudentObject.course = eachStudentCourse;
+    eachStudentObject.course_name = eachStudentCourse;
     eachStudentObject.grade = eachStudentGrade;
     student_array.push(eachStudentObject);
     clearAddStudentFormInputs();
     updateStudentList();
     sendDataToServer(eachStudentObject)
-    console.log(student_array)
+
 }
 
 function clearAddStudentFormInputs() {
@@ -59,6 +59,7 @@ function updateStudentList() {
 
 function calculateGradeAverage(array) {
     var total = 0;
+    // debugger;
     for (var i = 0; i < array.length; i++) {
         total += parseInt(array[i].grade);
     }
@@ -94,9 +95,8 @@ function renderStudentOnDom(eachStudentObject) {
         $('#confirmDeleteModal').modal({
             show: true
         });
-        var closestRow = this.closest('tr');
-        $('.confirmh5').text(`Are you sure you want to delete ${eachStudentObject.name}?`);
-        $('.confirmDeleteButton').on('click', function () {
+        
+        function confirmDelete() {
             $(closestRow).remove();
             //this is the main function to delete the student object that was clicked
             handleDeleteButton(eachStudentObject);
@@ -104,20 +104,29 @@ function renderStudentOnDom(eachStudentObject) {
             //this is the function that deletes the data from the server
             deleteStudentFromDatabase(eachStudentObject);
             $('#confirmDeleteModal').modal('hide')
-        })
+        }
+
+        var closestRow = this.closest('tr');
+        $('.confirmh5').text(`Are you sure you want to delete ${eachStudentObject.name}?`);
+        $('.confirmDeleteButton').off();
+        $('.confirmDeleteButton').on('click', confirmDelete);
+
+        
+
     });
     editButton.on('click', function () {
         $('#editModal').modal({
             show: true
         })
-        console.log($(this))
+
         handleEditButton();
 
     })
+
     tableButton.append(deleteButton);
     editButtonTD.append(editButton)
     tableName.text(eachStudentObject.name);
-    tableCourse.text(eachStudentObject.course);
+    tableCourse.text(eachStudentObject.course_name);
     tableGrade.text(eachStudentObject.grade);
     tableRow.append(tableName, tableCourse, tableGrade, editButtonTD, tableButton);
     $('tbody').append(tableRow);
@@ -128,26 +137,33 @@ function handleEditButton() {
 }
 
 function handleDeleteButton(currentStudent) {
-    student_array.splice(currentStudent, 1);
+    console.log('current student', currentStudent, 'student array:', student_array);
+    var deletePosition = student_array.indexOf(currentStudent);
+    student_array.splice(deletePosition, 1);
+    currentStudent = null;
     var avgGrade = calculateGradeAverage(student_array);
-    $('.avgGrade').text(avgGrade);
+    $('.avgGrade').text(avgGrade + '%');
 }
 
 function getDataFromServer() {
     var the_data = {
-        api_key: '7Rc7NsB569'
+        action: 'readAll'
     }
     var ajaxOptions = {
         dataType: 'json',
         data: the_data,
-        method: 'POST',
-        url: 'https://s-apis.learningfuze.com/sgt/get',
+        method: 'GET',
+        url: 'data.php',
         success: function (response) {
             var responseArray = response.data;
-            console.log(responseArray);
-            for (var i = 0; i < responseArray.length; i++) {
-                student_array = responseArray;
-                renderStudentOnDom(responseArray[i]);
+
+            if (responseArray) {
+                for (let i = 0; i < responseArray.length; i++) {
+                    student_array = responseArray;
+                    renderStudentOnDom(responseArray[i]);
+                }
+                var avgGrade = calculateGradeAverage(responseArray);
+                $('.avgGrade').text(avgGrade + '%');
             }
         },
         error: function () {
@@ -159,20 +175,19 @@ function getDataFromServer() {
 
 function sendDataToServer(eachStudentObject) {
     var the_data = {
-        api_key: '7Rc7NsB569',
+        action: 'insert',
         name: eachStudentObject.name,
         grade: eachStudentObject.grade,
-        course: eachStudentObject.course,
-        student_id: parseInt(eachStudentObject.id)
+        course: eachStudentObject.course_name,
     }
     var ajaxOptions = {
         dataType: 'json',
         data: the_data,
-        method: 'POST',
-        url: 'https://s-apis.learningfuze.com/sgt/create',
-        success: function () {
-            console.log('success');
-            console.log(student_array)
+        method: 'GET',
+        url: 'data.php',
+        success: function (response) {
+
+            eachStudentObject.id = response.insertID;
         },
         error: function () {
             $('#errorModal').modal('show');
@@ -183,17 +198,18 @@ function sendDataToServer(eachStudentObject) {
 }
 
 function deleteStudentFromDatabase(eachStudentObject) {
+
     var the_data = {
-        api_key: '7Rc7NsB569',
+        action: 'delete',
         student_id: parseInt(eachStudentObject.id)
     }
     var ajaxOptions = {
         dataType: 'json',
         data: the_data,
-        method: 'POST',
-        url: 'https://s-apis.learningfuze.com/sgt/delete',
-        success: function () {
-            console.log(eachStudentObject)
+        method: 'GET',
+        url: 'data.php',
+        success: function (response) {
+
         },
         error: function () {
             $('#errorModal').modal('show');

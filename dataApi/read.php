@@ -15,7 +15,7 @@ $result = mysqli_query($conn, $query);
 		if(mysqli_num_rows($result) > 0){
 			$output['success'] = true;
 			//while each row data is being fetched..grab each row that is associated with result; and push it into output['data'];
-			while($row = mysql_fetch_assoc($result)){
+			while($row = mysqli_fetch_assoc($result)){
 				$output['data'][] = $row;
 			}
 		} else {
@@ -24,7 +24,7 @@ $result = mysqli_query($conn, $query);
 	}
 //else: 
 	//check if any data came back
-		$output['data']=[];
+		//$output['data']=[];
 		//if it did, change output success to true
 		//do a while loop to collect all the data 
 			//add each row of data to the $output['data'] array

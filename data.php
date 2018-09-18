@@ -16,12 +16,14 @@ $output = [
 switch($_GET['action']){
 	case 'readAll':
 		//include the php file 'read.php'
-		include('read.php');
+		include('dataApi/read.php');
 		break;
 	case 'insert':
+		include('dataApi/insert.php');
 		//include the php file insert.php
 		break;
 	case 'delete':
+		include('dataApi/delete.php');
 		//include the php file delete.php
 		break;
 	case 'update':
