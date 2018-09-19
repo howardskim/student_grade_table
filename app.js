@@ -27,21 +27,18 @@ function handleAddClicked() {
 }
 
 function addStudent() {
-    var eachStudentObject = {
-
-    };
+    var eachStudentObject = {};
     var eachStudentName = $('#studentName').val();
     var eachStudentCourse = $('#course').val();
     var eachStudentGrade = $('#studentGrade').val();
-    // var eachStudentId = student_array[student_array.length - 1].id //+ 1;
-    // eachStudentObject.id = eachStudentId;
     eachStudentObject.name = eachStudentName;
     eachStudentObject.course_name = eachStudentCourse;
     eachStudentObject.grade = eachStudentGrade;
     student_array.push(eachStudentObject);
     clearAddStudentFormInputs();
+    sendDataToServer(eachStudentObject);
+    getDataFromServer();
     updateStudentList();
-    sendDataToServer(eachStudentObject)
 
 }
 
@@ -54,12 +51,11 @@ function clearAddStudentFormInputs() {
 function updateStudentList() {
     renderStudentOnDom(student_array[student_array.length - 1]);
     var avgGrade = calculateGradeAverage(student_array);
-    $('.avgGrade').text(avgGrade)
+    $('.avgGrade').text(avgGrade + '%')
 }
 
 function calculateGradeAverage(array) {
     var total = 0;
-    // debugger;
     for (var i = 0; i < array.length; i++) {
         total += parseInt(array[i].grade);
     }
@@ -88,8 +84,8 @@ function renderStudentOnDom(eachStudentObject) {
     });
     var editButton = $('<button>', {
         class: 'btn btn-warning editButton',
-        id: 'editEntry',
-        text: 'Update'
+        id: eachStudentObject.id,
+        text: 'Edit'
     })
     deleteButton.on('click', function () {
         $('#confirmDeleteModal').modal({
@@ -110,19 +106,16 @@ function renderStudentOnDom(eachStudentObject) {
         $('.confirmh5').text(`Are you sure you want to delete ${eachStudentObject.name}?`);
         $('.confirmDeleteButton').off();
         $('.confirmDeleteButton').on('click', confirmDelete);
-
-        
-
     });
-    editButton.on('click', function () {
+    editButton.on('click',  function() {
         $('#editModal').modal({
             show: true
         })
-
-        handleEditButton();
-
+        console.log(this);
+        var studentID = $(this).attr('id');
+        $('#idHolder').text(studentID);
+        $('#saveChanges').on('click', handleSavedUpdate);
     })
-
     tableButton.append(deleteButton);
     editButtonTD.append(editButton)
     tableName.text(eachStudentObject.name);
@@ -132,7 +125,36 @@ function renderStudentOnDom(eachStudentObject) {
     $('tbody').append(tableRow);
 }
 
-function handleEditButton() {
+function handleSavedUpdate(){
+    var editedName = $('#editName').val();
+    var editedCourse = $('#editCourse').val();
+    var editedGrade = $('#editGrade').val();
+    var buttonID = $('#idHolder').text();
+    var the_data = {
+        editedName,
+        editedCourse,
+        editedGrade,
+        buttonID,
+        action: 'update'
+    }
+    var ajaxOptions = {
+        dataType: 'json',
+        data: the_data,
+        method: 'GET',
+        url: 'data.php',
+        success: function (response) {
+            $('#editName').val('');
+            $('#editCourse').val('');
+            $('#editGrade').val('');
+            $('tbody').empty();
+            getDataFromServer();
+            updateStudentList();
+        },
+        error: function () {
+            $('#errorModal').modal('show');
+        }
+    }
+    $.ajax(ajaxOptions);
 
 }
 
@@ -155,8 +177,8 @@ function getDataFromServer() {
         method: 'GET',
         url: 'data.php',
         success: function (response) {
+            $('tbody').empty();
             var responseArray = response.data;
-
             if (responseArray) {
                 for (let i = 0; i < responseArray.length; i++) {
                     student_array = responseArray;
@@ -186,7 +208,6 @@ function sendDataToServer(eachStudentObject) {
         method: 'GET',
         url: 'data.php',
         success: function (response) {
-
             eachStudentObject.id = response.insertID;
         },
         error: function () {
@@ -194,11 +215,9 @@ function sendDataToServer(eachStudentObject) {
         }
     }
     $.ajax(ajaxOptions);
-
 }
 
 function deleteStudentFromDatabase(eachStudentObject) {
-
     var the_data = {
         action: 'delete',
         student_id: parseInt(eachStudentObject.id)

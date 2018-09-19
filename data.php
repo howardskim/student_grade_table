@@ -28,6 +28,7 @@ switch($_GET['action']){
 		break;
 	case 'update':
 		//include the update.php file
+		include('dataApi/update.php');
 		break;
 }
 
