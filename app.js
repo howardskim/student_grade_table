@@ -17,6 +17,12 @@ function addClickHandlersToElements() {
     $('.addButton').on('click', handleAddClicked)
     $('.cancelButton').on('click', handleCancelClick)
     $('.getDataFromServerButton').on('click', getDataFromServer);
+    $('#cancelChanges').on('click', function(){
+        $('#editModal').modal('hide');
+    })
+    $('#saveChanges').on('click', function () {
+        $('#editModal').modal('hide');
+    })
 }
 
 function handleAddClicked() {
@@ -155,7 +161,6 @@ function handleSavedUpdate(){
         }
     }
     $.ajax(ajaxOptions);
-
 }
 
 function handleDeleteButton(currentStudent) {
