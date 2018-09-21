@@ -41,10 +41,9 @@ function addStudent() {
     eachStudentObject.course_name = eachStudentCourse;
     eachStudentObject.grade = eachStudentGrade;
     student_array.push(eachStudentObject);
-    clearAddStudentFormInputs();
     sendDataToServer(eachStudentObject);
-    getDataFromServer();
-    updateStudentList();
+    clearAddStudentFormInputs();
+    console.log(student_array)
 
 }
 
@@ -118,9 +117,14 @@ function renderStudentOnDom(eachStudentObject) {
             show: true
         })
         console.log(this);
+        $('#editModalHeader').text(`Student: ${eachStudentObject.name}`)
         var studentID = $(this).attr('id');
-        $('#idHolder').text(studentID);
+        $('#idHolder').text(`ID: ${studentID}`);
         $('#saveChanges').on('click', handleSavedUpdate);
+        $('#editName').val(eachStudentObject.name)
+        $('#editCourse').val(eachStudentObject.course_name)
+        $('#editGrade').val(eachStudentObject.grade)
+
     })
     tableButton.append(deleteButton);
     editButtonTD.append(editButton)
@@ -214,6 +218,8 @@ function sendDataToServer(eachStudentObject) {
         url: 'data.php',
         success: function (response) {
             eachStudentObject.id = response.insertID;
+            getDataFromServer();
+            updateStudentList();
         },
         error: function () {
             $('#errorModal').modal('show');
