@@ -20,22 +20,56 @@ function addClickHandlersToElements() {
     $('#cancelChanges').on('click', function(){
         $('#editModal').modal('hide');
     })
-    $('#saveChanges').on('click', function () {
-        $('#editModal').modal('hide');
+    $('#studentName').on('click', function(){
+        $(this).parent().removeClass('has-error')
     })
+    $('#studentGrade').on('click', function () {
+        $(this).parent().removeClass('has-error')
+    })
+    $('#course').on('click', function () {
+        $(this).parent().removeClass('has-error')
+    })
+}
+function validateInputs(input){
+    let inputArray = input.split('')
+    let capitalized = inputArray[0].toUpperCase();
+    inputArray[0] = capitalized;
+    return inputArray.join(''); 
 }
 
 function handleAddClicked() {
-    if ($('#studentName').val() === '' && $('#course').val() === '' && $('#studentGrade').val() === '') {
+    let studentName = $('#studentName').val();
+    let courseName = $('#course').val();
+    let studentGrade = $('#studentGrade').val();
+    let studentNameResult = /^[a-zA-Z ]+$/.test(studentName);
+    if (studentName === '' && courseName === '' && studentGrade === '') {
         return;
+    } 
+    if(isNaN(studentGrade) || studentGrade === ""){
+        $('#studentGrade').parent().addClass('has-error')
+        $('#validationModal').modal('show');
+        $('#validateText').text('Please Enter A Numeric Grade')
+        return;
+    }
+    if(!isNaN(courseName) || courseName === "" || courseName.length < 3){
+        $('#course').parent().addClass('has-error')
+        $('#validationModal').modal('show');
+        $('#validateText').text('Please Enter Valid Course Name With At Least 3 Characters')
+        return  
+    }
+    if(!studentNameResult || studentName.length < 2){
+        $('#studentName').parent().addClass('has-error')
+        $('#validationModal').modal('show');
+        $('#validateText').text('Please Enter Valid Student Name');
+        return
     }
     addStudent();
 }
 
 function addStudent() {
     var eachStudentObject = {};
-    var eachStudentName = $('#studentName').val();
-    var eachStudentCourse = $('#course').val();
+    var eachStudentName = validateInputs($('#studentName').val());
+    var eachStudentCourse = validateInputs($('#course').val());
     var eachStudentGrade = $('#studentGrade').val();
     eachStudentObject.name = eachStudentName;
     eachStudentObject.course_name = eachStudentCourse;
@@ -85,12 +119,14 @@ function renderStudentOnDom(eachStudentObject) {
     var deleteButton = $('<button>', {
         class: 'btn btn-danger dButton',
         id: eachStudentObject.id,
+        style: 'margin-top: 1%; margin-left: 3%',
         text: 'Delete'
     });
     var editButton = $('<button>', {
         class: 'btn btn-warning editButton',
         id: eachStudentObject.id,
-        text: 'Edit'
+        text: 'Update',
+        style: 'margin-top: 1%'
     })
     deleteButton.on('click', function () {
         $('#confirmDeleteModal').modal({
@@ -116,10 +152,10 @@ function renderStudentOnDom(eachStudentObject) {
         $('#editModal').modal({
             show: true
         })
-        console.log(this);
         $('#editModalHeader').text(`Student: ${eachStudentObject.name}`)
         var studentID = $(this).attr('id');
         $('#idHolder').text(`ID: ${studentID}`);
+        $('#saveChanges').off();
         $('#saveChanges').on('click', handleSavedUpdate);
         $('#editName').val(eachStudentObject.name)
         $('#editCourse').val(eachStudentObject.course_name)
@@ -127,7 +163,7 @@ function renderStudentOnDom(eachStudentObject) {
 
     })
     tableButton.append(deleteButton);
-    editButtonTD.append(editButton)
+    editButtonTD.append(editButton, deleteButton)
     tableName.text(eachStudentObject.name);
     tableCourse.text(eachStudentObject.course_name);
     tableGrade.text(eachStudentObject.grade);
@@ -139,7 +175,26 @@ function handleSavedUpdate(){
     var editedName = $('#editName').val();
     var editedCourse = $('#editCourse').val();
     var editedGrade = $('#editGrade').val();
-    var buttonID = $('#idHolder').text();
+    var buttonID = parseInt($('#idHolder').text().slice(3));
+    let editedNameResult = /^[a-zA-Z ]+$/.test(editedName);
+    let editedCourseResult = /^[a-zA-Z ]+$/.test(editedCourse);
+    if (editedName === '' && editedCourse === '' && editedGrade === '') {
+        return;
+    }
+
+    if (isNaN(editedGrade) || editedGrade === "") {
+        $('#editModalText').text('Please Enter A Numeric Grade')
+        return;
+    }
+    if (!isNaN(editedCourse) || editedCourse === "" || editedCourse.length < 3 || !editedCourseResult) {
+        $('#editModalText').text('Please Enter Valid Course Name With At Least 3 Characters')
+        return;
+    }
+    if (!editedName || editedName.length < 2) {
+        $('#editModalText').text('Please Enter Valid Student Name');
+        return;
+    }
+
     var the_data = {
         editedName,
         editedCourse,
@@ -153,10 +208,10 @@ function handleSavedUpdate(){
         method: 'GET',
         url: 'data.php',
         success: function (response) {
+            $('tbody').empty();            
             $('#editName').val('');
             $('#editCourse').val('');
             $('#editGrade').val('');
-            $('tbody').empty();
             getDataFromServer();
             updateStudentList();
         },
@@ -165,6 +220,8 @@ function handleSavedUpdate(){
         }
     }
     $.ajax(ajaxOptions);
+    $('#editModal').modal('hide');
+    $('#editModalText').text('')
 }
 
 function handleDeleteButton(currentStudent) {
